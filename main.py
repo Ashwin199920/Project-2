@@ -148,5 +148,3 @@ for line in input_file:
 
 input_file.close()
 output_file.close()
-
-print("Hello")
