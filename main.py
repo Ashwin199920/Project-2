@@ -135,7 +135,7 @@ def process(b):
 
 # here begins main
 
-input_file = open("machinecode.txt", "r")
+input_file = open("Project1.txt", "r")
 output_file = open("asm.txt", "w")
 line_count = 0
 
