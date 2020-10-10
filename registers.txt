@@ -1,5 +1,5 @@
-def registers(r):
-  r[0] = zero
+def registers_NO(rt, rs, imm):
+  r[0]: zero
   r[1] = at
   r[2] = v0
   r[3] = v1
