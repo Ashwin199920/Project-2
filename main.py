@@ -1,3 +1,45 @@
+reg =   [[0,0,"$zero"],
+        [1,0,"$at"],
+        [2,0,"$v0"],
+        [3,0,"$v1"],
+        [4,0,"$a0"],
+        [5,0,"$a1"],
+        [6,0,"$a2"],
+        [7,0,"$a3"],
+        [8,0,"$t0"],
+        [9,0,"$t1"],
+        [10,0,"$t2"],
+        [11,0,"$t3"],
+        [12,0,"$t4"],
+        [13,0,"$t5"],
+        [14,0,"$t6"],
+        [15,0,"$t7"],
+        [16,0,"$s0"],
+        [17,0,"$s1"],
+        [18,0,"$s2"],
+        [19,0,"$s3"],
+        [20,0,"$s4"],
+        [21,0,"$s5"],
+        [22,0,"$s6",],
+        [23,0,"$s7"],
+        [24,0,"$t8"],
+        [25,0,"$t9"],
+        [26,0,"$k0"],
+        [27,0,"$k1"],
+        [28,0,"$gp"],
+        [29,0,"$sp"],
+        [30,0,"$fp"],
+        [31,0,"$ra"] ]
+LO = 0
+
+def print_reg():
+  x = [x*2 for x in range(16)]
+  for i in x:
+    print(reg[i][2] + "=", "$"% (reg[i][1])+'    '+reg[i+1][2] + "=", "$"% (reg[i+1][1]))
+  print("LO_REG = " + str(LO))
+  return
+
+
 def bin_to_dec(b):
     if (b[0] == "0"):
         return int(b, base=2)
@@ -38,7 +80,7 @@ def process(b):
     b_func = b[26:]
 
     #print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
-
+    pc = 0
     asm = ""
 
     if (b_op == '001000'):  # ADDI
@@ -46,13 +88,18 @@ def process(b):
         rt = int(b_rt, base=2)
         imm = bin_to_dec(b_imm)
 
+
+
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         imm = str(imm)
 
         asm = "addi " + rt + ", " + rs + ", " + imm
+        pc = 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
+
 
     elif (b_op == '000000') and (b_func == '100000'):  # ADD
         rs = int(b_rs, base=2)
@@ -63,8 +110,10 @@ def process(b):
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "add " + rd + ", " + rs + ", " + rt
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
         #print (f'NO idea about op = {b_op}')
 
     elif (b_op == '000000') and (b_func == '100010'):  # SUB
@@ -76,8 +125,10 @@ def process(b):
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "sub " + rd + ", " + rs + ", " + rt
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
 
     elif (b_op == '001100'):  # ANDI
         rs = int(b_rs, base=2)
@@ -89,8 +140,10 @@ def process(b):
         imm = str(imm)
 
         asm = "andi " + rt + ", " + rs + ", " + imm
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
 
     elif (b_op == '000000') and (b_func == '101010'):  # SLT
         rs = int(b_rs, base=2)
@@ -101,8 +154,10 @@ def process(b):
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "slt " + rd + ", " + rs + ", " + rt
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
 
     elif (b_op == '100011'):  # LW
         rs = int(b_rs, base=2)
@@ -114,8 +169,10 @@ def process(b):
         imm = str(imm)
 
         asm = "lw " + rt + ", " + imm + '(' + rs + ')'
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
 
     elif (b_op == '101011'):  # SW
         rs = int(b_rs, base=2)
@@ -127,8 +184,10 @@ def process(b):
         imm = str(imm)
 
         asm = "sw " + rt + ", " + imm + '(' + rs + ')'
+        pc = int(pc) + 4
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'pc = {pc}')
 
     return (asm)
 
