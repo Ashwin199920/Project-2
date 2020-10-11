@@ -32,12 +32,19 @@ reg =   [[0,0,"$zero"],
         [31,0,"$ra"] ]
 LO = 0
 
+
 def print_reg():
   x = [x*2 for x in range(16)]
   for i in x:
     print(reg[i][2] + "=", "$"% (reg[i][1])+'    '+reg[i+1][2] + "=", "$"% (reg[i+1][1]))
   print("LO_REG = " + str(LO))
   return
+
+pc = 0
+
+def PC_plus4():
+  global pc
+  pc += 4
 
 
 def bin_to_dec(b):
@@ -80,7 +87,6 @@ def process(b):
     b_func = b[26:]
 
     #print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
-    pc = 0
     asm = ""
 
     if (b_op == '001000'):  # ADDI
@@ -88,16 +94,21 @@ def process(b):
         rt = int(b_rt, base=2)
         imm = bin_to_dec(b_imm)
 
+        reg[rt][1] = int(reg[rs][1]) + int(imm)
+        updateReg1 = reg[rt][1]
 
+        reg1 = reg[rt][2]
+        # reg2 = reg[rs][2]
 
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         imm = str(imm)
 
         asm = "addi " + rt + ", " + rs + ", " + imm
-        pc = 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'Updated registers: {reg1} = {updateReg1}')
         print(f'pc = {pc}')
 
 
@@ -106,13 +117,18 @@ def process(b):
         rt = int(b_rt, base=2)
         rd = int(b_rd, base=2)
 
+        reg[rd][1] = int(reg[rs][1] + int(reg[rt][1]))
+        updateReg1 = reg[rd][1]
+        reg1 = reg[rd][2]
+
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "add " + rd + ", " + rs + ", " + rt
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'Updated registers: {reg1} = {updateReg1}')
         print(f'pc = {pc}')
         #print (f'NO idea about op = {b_op}')
 
@@ -121,13 +137,18 @@ def process(b):
         rt = int(b_rt, base=2)
         rd = int(b_rd, base=2)
 
+        reg[rd][1] = int(reg[rs][1] - int(reg[rt][1]))
+        updateReg1 = reg[rd][1]
+        reg1 = reg[rd][2]
+
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "sub " + rd + ", " + rs + ", " + rt
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'Updated registers: {reg1} = {updateReg1}')
         print(f'pc = {pc}')
 
     elif (b_op == '001100'):  # ANDI
@@ -135,14 +156,20 @@ def process(b):
         rt = int(b_rt, base=2)
         imm = bin_to_dec(b_imm)
 
+        reg[rt][1] = int(reg[rs][1]) & int(imm)
+        updateReg1 = reg[rt][1]
+
+        reg1 = reg[rt][2]
+
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         imm = str(imm)
 
         asm = "andi " + rt + ", " + rs + ", " + imm
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
+        print(f'Updated registers: {reg1} = {updateReg1}')
         print(f'pc = {pc}')
 
     elif (b_op == '000000') and (b_func == '101010'):  # SLT
@@ -150,13 +177,22 @@ def process(b):
         rt = int(b_rt, base=2)
         rd = int(b_rd, base=2)
 
+        if(reg[rs][1] < reg[rt][1]):
+          reg[rd][1] = 1
+        else:
+          reg[rd][1] = 0
+
+        updateReg1 = reg[rd][1]
+        reg1 = reg[rd][2]
+
         rs = "$" + str(rs)
         rt = "$" + str(rt)
         rd = "$" + str(rd)
         asm = "slt " + rd + ", " + rs + ", " + rt
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_rd} | {b_sh} | {b_func}')
         print(f'in asm: {asm}')
+        print(f'Updated registers: {reg1} = {updateReg1}')
         print(f'pc = {pc}')
 
     elif (b_op == '100011'):  # LW
@@ -169,7 +205,7 @@ def process(b):
         imm = str(imm)
 
         asm = "lw " + rt + ", " + imm + '(' + rs + ')'
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
         print(f'pc = {pc}')
@@ -184,7 +220,7 @@ def process(b):
         imm = str(imm)
 
         asm = "sw " + rt + ", " + imm + '(' + rs + ')'
-        pc = int(pc) + 4
+        PC_plus4()
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
         print(f'pc = {pc}')
@@ -194,7 +230,7 @@ def process(b):
 
 # here begins main
 
-input_file = open("Project1.txt", "r")
+input_file = open("machinecode.txt", "r")
 output_file = open("asm.txt", "w")
 line_count = 0
 
