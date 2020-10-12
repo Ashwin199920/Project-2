@@ -31,7 +31,10 @@ reg =   [[0,0,"$zero"],
         [30,0,"$fp"],
         [31,0,"$ra"] ]
 LO = 0
-
+data_array = []
+for x in range(0, 3001):
+	data_array.append(0)
+  
 
 def print_reg():
   x = [x*2 for x in range(16)]
@@ -199,6 +202,9 @@ def process(b):
         rs = int(b_rs, base=2)
         rt = int(b_rt, base=2)
         imm = bin_to_dec(b_imm)
+        
+        current_word = '{:04X}'.format(rs+imm+8192) 
+        loaded_word = data_array[imm+rs]
 
         rs = "$" + str(rs)
         rt = "$" + str(rt)
@@ -209,11 +215,15 @@ def process(b):
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
         print(f'pc = {pc}')
+        print(f'Current word 0x{current_word} loaded {loaded_word}')
 
     elif (b_op == '101011'):  # SW
         rs = int(b_rs, base=2)
         rt = int(b_rt, base=2)
         imm = bin_to_dec(b_imm)
+
+        current_word = '{:04X}'.format(rs+imm+8192)
+        data_array[imm+rs] = rt
 
         rs = "$" + str(rs)
         rt = "$" + str(rt)
@@ -221,9 +231,34 @@ def process(b):
 
         asm = "sw " + rt + ", " + imm + '(' + rs + ')'
         PC_plus4()
+        
         print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
         print(f'in asm: {asm}')
         print(f'pc = {pc}')
+        print(f'Stored word {rt} at 0x{current_word}')
+    
+    elif (b_op == '101111'):  # WIDTH
+        #width rt, imm(rs)
+
+        rs = int(b_rs, base=2)
+        rt = int(b_rt, base=2)
+        
+        imm = bin_to_dec(b_imm)
+        
+        width_binary = "{0:b}".format(imm+rs)
+        width = (len(width_binary) - width_binary[::-1].index("1") - 1) - width_binary.index("1") + 1
+
+        rs = "$" + str(rs)
+        rt = "$" + str(rt)
+        imm = str(imm)
+
+        asm = "width " + rt + ", " + imm + '(' + rs + ')'
+        PC_plus4()
+        
+        print(f'-> {b_op} | {b_rs} | {b_rt} | {b_imm}')
+        print(f'in asm: {asm}')
+        print(f'pc = {pc}')
+        print(f'Width is {width}')
 
     return (asm)
 
